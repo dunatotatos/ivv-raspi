@@ -21,7 +21,7 @@ class Sensor:
         ])
 
     def check_run(self):
-        if self.read():
+        if not self.read():
             self.getRequest()
 
 
