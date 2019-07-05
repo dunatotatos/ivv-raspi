@@ -16,7 +16,7 @@ class Sensor:
     def getRequest(self):
         print("get request send:{}".format(self.nameGET))
         subprocess.call([
-            "curl", "-X", "GET",
+            "curl", "-m", "1", "-X", "GET",
             "http://192.168.42.42:14999/{}".format(self.nameGET)
         ])
 
@@ -27,8 +27,10 @@ class Sensor:
 
 def check_run_temperature(sensor):
     if sensor.get_temperature() > 35:
-        subprocess.call(
-            ["curl", "-X", "GET", "http://192.168.42.42:14999/temperature"])
+        subprocess.call([
+            "curl", "-m", "1", "-X", "GET",
+            "http://192.168.42.42:14999/temperature"
+        ])
 
 
 def init():
