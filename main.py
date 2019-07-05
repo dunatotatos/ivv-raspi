@@ -14,7 +14,7 @@ class Sensor:
         return GPIO.input(self.pin)
 
     def getRequest(self):
-        print("get request send")
+        print("get request send:{}".format(self.nameGET))
         subprocess.call([
             "curl", "-X", "GET",
             "http://192.168.42.42:14999/{}".format(self.nameGET)
@@ -38,10 +38,12 @@ def init():
     global caveau
     global serre
     global sensor_temperature
-    atelier = Sensor(10, "okok")
-    caveau = Sensor(11, "okok")
-    serre = Sensor(12, "okok")
-    sensor_temperature = W1ThermSensor()
+    atelier = Sensor(14, "14")
+    caveau = Sensor(15, "15")
+    serre = Sensor(18, "18")
+
+
+# sensor_temperature = W1ThermSensor()
 
 
 def main():
@@ -50,7 +52,7 @@ def main():
         atelier.check_run()
         caveau.check_run()
         serre.check_run()
-        check_run_temperature(sensor_temperature)
+    # check_run_temperature(sensor_temperature)
 
 
 if __name__ == "__main__":
