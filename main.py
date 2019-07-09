@@ -52,10 +52,10 @@ def init():
 
 def main():
     init()
-    if listener.server_program() == "start":
+    if listener.server_program() == "ola":
         print("c'est parti !")
         subprocess.call(
-            ["curl", "-X", "GET", "http://192.168.42.42:14999/ola"])
+            ["curl", "-X", "GET", "http://192.168.42.42:14999/start"])
     while (1):
         atelier.check_run()
         caveau.check_run()
