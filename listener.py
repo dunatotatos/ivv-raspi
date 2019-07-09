@@ -3,7 +3,7 @@ import socket
 
 def server_program():
     # get the hostname
-    host = socket.gethostname()
+    host = "192.168.42.13"  #socket.gethostname()
     port = 14999  # initiate port no above 1024
 
     server_socket = socket.socket()  # get instance
