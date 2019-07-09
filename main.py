@@ -3,6 +3,8 @@ import subprocess
 import time
 from w1thermsensor import W1ThermSensor
 
+import listener
+
 
 class Sensor:
     def __init__(self, pin, nameGET):
@@ -50,6 +52,10 @@ def init():
 
 def main():
     init()
+    if listener.server_program() == "start":
+        print("c'est parti !")
+        subprocess.call(
+            ["curl", "-X", "GET", "http://192.168.42.42:14999/ola"])
     while (1):
         atelier.check_run()
         caveau.check_run()
