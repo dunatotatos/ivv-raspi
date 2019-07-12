@@ -23,7 +23,10 @@ class Sensor:
         ])
 
     def check_run(self):
-        if not self.read():
+        if self.read() and game_state[self.nameGET] == False:
+            print(game_state)
+            game_state[self.nameGET] = True
+            print(game_state)
             self.getRequest()
 
 
@@ -42,9 +45,11 @@ def init():
     global caveau
     global serre
     global sensor_temperature
-    atelier = Sensor(11, "serre")
+    global game_state
+    game_state = {"atelier": False, "caveau": False, "serre": False}
+    atelier = Sensor(18, "serre")
     caveau = Sensor(15, "15")
-    serre = Sensor(18, "18")
+    serre = Sensor(11, "serre")
 
 
 def wait_start():
