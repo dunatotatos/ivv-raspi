@@ -47,17 +47,22 @@ def init():
     serre = Sensor(18, "18")
 
 
+def wait_start():
+    if listener.server_program() == "start":
+        print("c'est parti !")
+        subprocess.call(
+            ["curl", "-X", "GET", "http://192.168.42.42:14999/start"])
+        time.sleep(5)
+        subprocess.call(
+            ["curl", "-X", "GET", "http://192.168.42.42:14999/machine"])
+
+
 # sensor_temperature = W1ThermSensor()
 
 
 def main():
     init()
-    if listener.server_program() == "ola":
-        print("c'est parti !")
-        subprocess.call(
-            ["curl", "-X", "GET", "http://192.168.42.42:14999/start"])
-        subprocess.call(
-            ["curl", "-X", "GET", "http://192.168.42.42:14999/machine"])
+    wait_start()
     while (1):
         atelier.check_run()
         caveau.check_run()
