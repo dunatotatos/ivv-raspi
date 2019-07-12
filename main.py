@@ -42,7 +42,7 @@ def init():
     global caveau
     global serre
     global sensor_temperature
-    atelier = Sensor(14, "14")
+    atelier = Sensor(11, "serre")
     caveau = Sensor(15, "15")
     serre = Sensor(18, "18")
 
@@ -56,6 +56,8 @@ def main():
         print("c'est parti !")
         subprocess.call(
             ["curl", "-X", "GET", "http://192.168.42.42:14999/start"])
+        subprocess.call(
+            ["curl", "-X", "GET", "http://192.168.42.42:14999/machine"])
     while (1):
         atelier.check_run()
         caveau.check_run()
