@@ -47,8 +47,8 @@ def init():
     global sensor_temperature
     global game_state
     game_state = {"atelier": False, "caveau": False, "serre": False}
-    atelier = Sensor(18, "serre")
-    caveau = Sensor(15, "15")
+    atelier = Sensor(18, "atelier")
+    caveau = Sensor(15, "caveau")
     serre = Sensor(11, "serre")
 
 
