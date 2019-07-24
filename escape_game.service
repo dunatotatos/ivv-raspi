@@ -1,0 +1,15 @@
+[Unit]
+Description=Launch openocd script(cvra)
+After=network.target
+
+[Service]
+Type=idle
+ExecStart=+python3 /home/pi/escape-room/main.py
+Restart=always
+User=pi
+RemainAfterExit=no
+Restart=on-failure
+RestartSec=5s
+
+[Install]
+WantedBy=multi-user.target
