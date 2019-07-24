@@ -1,15 +1,12 @@
 [Unit]
-Description=Launch openocd script(cvra)
-After=network.target
+Description=Escape-game Service
+After=syslog.target network.target
 
 [Service]
-Type=idle
-ExecStart=+python3 /home/pi/escape-room/main.py
-Restart=always
+Type=simple
 User=pi
-RemainAfterExit=no
+ExecStart=/usr/bin/python3 /home/pi/escape-room/main.py
 Restart=on-failure
-RestartSec=5s
 
 [Install]
 WantedBy=multi-user.target
