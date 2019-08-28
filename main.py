@@ -44,8 +44,8 @@ def init():
     global atelier
     global caveau
     global serre
-    global sensor_temperature
     global game_state
+    global sensor_temperature = W1ThermSensor()
     game_state = {"atelier": False, "caveau": False, "serre": False}
     atelier = Sensor(11, "atelier")
     caveau = Sensor(5, "caveau")
@@ -62,7 +62,6 @@ def wait_start():
             ["curl", "-X", "GET", "http://192.168.42.42:14999/machine"])
 
 
-# sensor_temperature = W1ThermSensor()
 
 
 def main():
@@ -72,7 +71,7 @@ def main():
         atelier.check_run()
         caveau.check_run()
         serre.check_run()
-    # check_run_temperature(sensor_temperature)
+        check_run_temperature(sensor_temperature)
 
 
 if __name__ == "__main__":
