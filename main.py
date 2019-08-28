@@ -60,7 +60,7 @@ def init():
     global bird
     bird = 21
     global moine
-    moine = None  #need change !!!!!!
+    moine = 20
     GPIO.setup(bird, GPIO.OUT)
     GPIO.setup(moine, GPIO.OUT)
 
