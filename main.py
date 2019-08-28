@@ -31,11 +31,13 @@ class Sensor:
 
 
 def check_run_temperature(sensor):
-    if sensor.get_temperature() > 35:
+    if sensor.get_temperature() > (start_temperature + 2):
         subprocess.call([
             "curl", "-m", "1", "-X", "GET",
             "http://192.168.42.42:14999/temperature"
         ])
+        GPIO.output(bird, True)
+        GPIO.output(moine, True)
 
 
 def init():
@@ -45,11 +47,22 @@ def init():
     global caveau
     global serre
     global game_state
-    global sensor_temperature = W1ThermSensor()
+    global sensor_temperature
+    sensor_temperature = W1ThermSensor()
+    global start_temperature
+    start_temperature = sensor_temperature.get_temperature()
+
     game_state = {"atelier": False, "caveau": False, "serre": False}
     atelier = Sensor(11, "atelier")
     caveau = Sensor(5, "caveau")
     serre = Sensor(9, "serre")
+
+    global bird
+    bird = 21
+    global moine
+    moine = None  #need change !!!!!!
+    GPIO.setup(bird, GPIO.OUT)
+    GPIO.setup(moine, GPIO.OUT)
 
 
 def wait_start():
@@ -60,8 +73,6 @@ def wait_start():
         time.sleep(5)
         subprocess.call(
             ["curl", "-X", "GET", "http://192.168.42.42:14999/machine"])
-
-
 
 
 def main():
