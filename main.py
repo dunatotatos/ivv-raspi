@@ -4,6 +4,7 @@ import time
 from w1thermsensor import W1ThermSensor
 
 import listener
+import constant
 
 
 class Sensor:
@@ -18,8 +19,8 @@ class Sensor:
     def getRequest(self):
         print("get request send:{}".format(self.nameGET))
         subprocess.call([
-            "curl", "-m", "1", "-X", "GET",
-            "http://192.168.42.42:14999/{}".format(self.nameGET)
+            "curl", "-m", "1", "-X", "GET", "{}{}".format(
+                constant.url, self.nameGET)
         ])
 
     def check_run(self):
@@ -36,7 +37,7 @@ def check_run_temperature(sensor):
         time.sleep(3)
         subprocess.call([
             "curl", "-m", "1", "-X", "GET",
-            "http://192.168.42.42:14999/temperature"
+            "{}temperature".format(constant.url)
         ])
         time.sleep(5)
         GPIO.output(bird, True)
@@ -72,11 +73,10 @@ def init():
 def wait_start():
     if listener.server_program() == "start":
         print("c'est parti !")
-        subprocess.call(
-            ["curl", "-X", "GET", "http://192.168.42.42:14999/start"])
+        subprocess.call(["curl", "-X", "GET", "{}start"]).format(constant.url)
         time.sleep(5)
-        subprocess.call(
-            ["curl", "-X", "GET", "http://192.168.42.42:14999/machine"])
+        subprocess.call(["curl", "-X", "GET",
+                         "{}machine"]).format(constant.url)
 
 
 def main():

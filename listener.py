@@ -1,9 +1,10 @@
 import socket
+import constant
 
 
 def server_program():
-    host = "192.168.42.13"  #socket.gethostname()
-    port = 14999  # initiate port no above 1024
+    host = constant.ip  #socket.gethostname()
+    port = constant.port  # initiate port no above 1024
     server_socket = socket.socket()  # get instance
     server_socket.bind((host, port))  # bind host address and port together
 
