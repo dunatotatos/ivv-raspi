@@ -8,27 +8,27 @@ import constant
 
 
 class Sensor:
-    def __init__(self, pin, nameGET):
+    def __init__(self, pin, name_get):
         self.pin = pin
-        self.nameGET = nameGET
+        self.name_get = name_get
         GPIO.setup(self.pin, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 
     def read(self):
         return GPIO.input(self.pin)
 
-    def getRequest(self):
-        print("get request send:{}".format(self.nameGET))
+    def get_request(self):
+        print("get request send:{}".format(self.name_get))
         subprocess.call([
             "curl", "-m", "1", "-X", "GET", "{}{}".format(
-                constant.url, self.nameGET)
+                constant.url, self.name_get)
         ])
 
     def check_run(self):
-        if self.read() and game_state[self.nameGET] == False:
+        if self.read() and game_state[self.name_get] == False:
             print(game_state)
-            game_state[self.nameGET] = True
+            game_state[self.name_get] = True
             print(game_state)
-            self.getRequest()
+            self.get_request()
 
 
 def check_run_temperature(sensor):
@@ -82,7 +82,7 @@ def wait_start():
 def main():
     init()
     wait_start()
-    while (1):
+    while (True):
         atelier.check_run()
         caveau.check_run()
         serre.check_run()
