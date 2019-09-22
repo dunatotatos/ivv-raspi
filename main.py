@@ -32,12 +32,16 @@ class Sensor:
 
 def check_run_temperature(sensor):
     if sensor.get_temperature() > (start_temperature + 2):
+        GPIO.output(moine, True)
+        time.sleep(3)
         subprocess.call([
             "curl", "-m", "1", "-X", "GET",
             "http://192.168.42.42:14999/temperature"
         ])
+        time.sleep(5)
         GPIO.output(bird, True)
-        GPIO.output(moine, True)
+        time.sleep(50)
+        GPIO.output(bird, False)
 
 
 def init():
