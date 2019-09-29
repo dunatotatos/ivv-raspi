@@ -42,7 +42,8 @@ def check_run_temperature(sensor):
         time.sleep(5)
         GPIO.output(bird, True)
         time.sleep(50)
-        GPIO.output(bird, False)
+        while True:
+            GPIO.output(bird, False)
 
 
 def init():
