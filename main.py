@@ -74,10 +74,10 @@ def init():
 def wait_start():
     if listener.server_program() == "start":
         print("c'est parti !")
-        subprocess.call(["curl", "-X", "GET", "{}start"]).format(constant.url)
+        subprocess.call(["curl", "-X", "GET", "{}start".format(constant.url)])
         time.sleep(5)
-        subprocess.call(["curl", "-X", "GET",
-                         "{}machine"]).format(constant.url)
+        subprocess.call(
+            ["curl", "-X", "GET", "{}machine".format(constant.url)])
 
 
 def main():
