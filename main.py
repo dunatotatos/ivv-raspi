@@ -38,7 +38,7 @@ def check_run_temperature(sensor):
             "curl", "-m", "1", "-X", "GET",
             "{}temperature".format(constant.url)
         ])
-        time.sleep(30)
+        time.sleep(61)
         GPIO.output(bird, True)
         time.sleep(50)
         while True:
