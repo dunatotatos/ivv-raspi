@@ -80,13 +80,16 @@ def wait_start():
 
 
 def main():
-    init()
-    wait_start()
-    while (True):
-        atelier.check_run()
-        caveau.check_run()
-        serre.check_run()
-        check_run_temperature(sensor_temperature)
+    try:
+        init()
+        wait_start()
+        while (True):
+            atelier.check_run()
+            caveau.check_run()
+            serre.check_run()
+            check_run_temperature(sensor_temperature)
+    finally:
+        GPIO.cleanup()
 
 
 if __name__ == "__main__":
