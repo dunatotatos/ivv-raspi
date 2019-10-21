@@ -2,6 +2,7 @@ import RPi.GPIO as GPIO
 import subprocess
 import time
 from w1thermsensor import W1ThermSensor
+from w1thermsensor.errors import ResetValueError
 
 import listener
 import constant
@@ -32,7 +33,41 @@ class Sensor:
 
 
 def check_run_temperature(sensor):
-    if sensor.get_temperature() > (start_temperature + 2):
+    def safe_get_temperature(sensor):
+        """
+        Try hard to return the reading of the temp sensor.
+
+        This method tries to get the temperature from the sensor,
+        and catches random exceptions due to bad communication.
+        An exception is still raised if the problem of bad
+        communication is persistent.
+
+        Return
+        ------
+        int: temperature in Celcius
+
+        Raise
+        -----
+        w1thermsensor.error.ResetValueError
+            If the sensor is not reachable.
+
+        """
+        nb_exceptions = 0
+        while True:
+            try:
+                current_temperature = sensor.get_temperature()
+            except ResetValueError:
+                print("Temperature sensor sent reset value. Ignoring.")
+                nb_exceptions += 1
+                if nb_exceptions >= 10:
+                    raise
+            else:
+                return current_temperature
+            time.sleep(0.1)
+
+    current_temperature = safe_get_temperature(sensor)
+
+    if current_temperature > (start_temperature + 2):
         GPIO.output(moine, True)
         subprocess.call([
             "curl", "-m", "1", "-X", "GET",
