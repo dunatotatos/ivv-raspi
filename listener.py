@@ -1,6 +1,9 @@
 import socket
+import logging
+
 import constant
 
+LOG = logging.getLogger(__name__)
 
 def server_program():
     host = constant.ip  #socket.gethostname()
@@ -15,7 +18,7 @@ def server_program():
     for i, k in enumerate(data[5:]):
         if i is 0: a = k
         elif k is " ":
-            print("-{}-".format(a))
+            LOG.debug("-{}-".format(a))
             break
         else:
             a += k

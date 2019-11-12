@@ -1,12 +1,14 @@
 import RPi.GPIO as GPIO
 import subprocess
 import time
+import logging
 from w1thermsensor import W1ThermSensor
 from w1thermsensor.errors import ResetValueError
 
 import listener
 import constant
 
+LOG = logging.getLogger(__name__)
 
 class Sensor:
     def __init__(self, pin, name_get):
@@ -18,7 +20,7 @@ class Sensor:
         return GPIO.input(self.pin)
 
     def get_request(self):
-        print("get request send:{}".format(self.name_get))
+        LOG.debug("get request send:{}".format(self.name_get))
         subprocess.call([
             "curl", "-m", "1", "-X", "GET", "{}{}".format(
                 constant.url, self.name_get)
@@ -26,9 +28,9 @@ class Sensor:
 
     def check_run(self):
         if self.read() and game_state[self.name_get] == False:
-            print(game_state)
+            LOG.debug(game_state)
             game_state[self.name_get] = True
-            print(game_state)
+            LOG.debug(game_state)
             self.get_request()
 
 
@@ -57,15 +59,19 @@ def check_run_temperature(sensor):
             try:
                 current_temperature = sensor.get_temperature()
             except ResetValueError:
-                print("Temperature sensor sent reset value. Ignoring.")
                 nb_exceptions += 1
+                LOG.warning(
+                    "Temperature sensor sent reset value %s times. Ignoring.",
+                    nb_exceptions)
                 if nb_exceptions >= 10:
+                    LOG.error("Maximum number of hardware failures reached. Stopping...")
                     raise
             else:
                 return current_temperature
             time.sleep(0.1)
 
     current_temperature = safe_get_temperature(sensor)
+    LOG.debug("Current temperature: %s.", str(current_temperature))
 
     if current_temperature > (start_temperature + 2):
         GPIO.output(moine, True)
@@ -107,7 +113,7 @@ def init():
 
 def wait_start():
     if listener.server_program() == "start":
-        print("c'est parti !")
+        LOG.info("C'est parti !")
         subprocess.call(["curl", "-X", "GET", "{}start".format(constant.url)])
         time.sleep(5)
         subprocess.call(
@@ -115,16 +121,25 @@ def wait_start():
 
 
 def main():
+    LOG.info("Start service.")
     try:
+        LOG.debug("Initializing.")
         init()
+        LOG.debug("Wait for game start.")
         wait_start()
+        LOG.debug("Game started.")
         while (True):
+            LOG.debug("Check atelier.")
             atelier.check_run()
+            LOG.debug("Check caveau.")
             caveau.check_run()
+            LOG.debug("Check serre.")
             serre.check_run()
+            LOG.debug("Check temperature.")
             check_run_temperature(sensor_temperature)
     finally:
         GPIO.cleanup()
+        LOG.info("Stop service.")
 
 
 if __name__ == "__main__":
