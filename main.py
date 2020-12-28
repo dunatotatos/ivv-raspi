@@ -11,14 +11,31 @@ import constant
 
 LOG = logging.getLogger(__name__)
 
+
 class Sensor:
-    def __init__(self, pin, name_get):
+    """
+    Interface with an electronic sensor connected to the baord.
+
+    This class is used to check if a sensor is active or not, and send the
+    associated request to Houdini.
+
+    int pin: GPIO number where the positive wire of the sensor is connected
+    str name_get: trailing part of the URL where an HTTP request is sent when
+        the sensor is activated
+    bool reverse: indicate if activated sensor makes GPIO.input() True
+        (default) or False (reverse = True)
+
+    """
+
+    def __init__(self, pin, name_get, reverse=False):
         self.pin = pin
         self.name_get = name_get
+        self.reverse = reverse
         GPIO.setup(self.pin, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 
     def read(self):
-        return GPIO.input(self.pin)
+        """Return the status of the sensor as True or False."""
+        return bool(GPIO.input(self.pin)) ^ self.reverse
 
     def get_request(self):
         LOG.debug("get request send:{}".format(self.name_get))
