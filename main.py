@@ -39,7 +39,7 @@ class Sensor:
 
     def get_request(self):
         """Send a signal to Houdini for this sensor."""
-        LOG.debug("get request send:{}".format(self.name_get))
+        LOG.debug("get request send: %s\n", self.name_get)
         subprocess.call([
             "curl", "-m", "1", "-X", "GET", "{}{}".format(
                 constant.URL_DST, self.name_get)
@@ -54,9 +54,8 @@ class Sensor:
 
         """
         if self.read() and game_state[self.name_get] == False:
-            LOG.debug(game_state)
+            LOG.debug("Activate %s sensor.\n", self.name_get)
             game_state[self.name_get] = True
-            LOG.debug(game_state)
             self.get_request()
 
 
