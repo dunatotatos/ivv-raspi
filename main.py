@@ -48,7 +48,7 @@ class Sensor:
 
     def check_run(self):
         """
-        Cif the sensor is active, and send a request to Houdini.
+        Check if the sensor is active, and send a request to Houdini.
 
         This method combines self.read and self.get_request in a simple
         one-shot method.
