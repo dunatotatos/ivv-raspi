@@ -149,60 +149,83 @@ def tonneau_callback():
     GPIO.output(constant.BIRD_GPIO, False)
 
 
-def init():
-    GPIO.setmode(GPIO.BCM)
+class Game:
+    """
+    One game instance.
 
-    global start
-    global atelier
-    global caveau
-    global serre
-    global sensor_temperature
-    sensor_temperature = Thermometer(name_get="temperature", difference=2)
-    sensor_temperature.start()
+    This class provides an interface to manage the logic of a game.
+    Instanciate this class to create a new game instance, and run game.start
+    to wait for the start button signal.
 
-    start = Sensor(constant.START_GPIO, "start")
-    atelier = Sensor(constant.ATELIER_GPIO, "atelier")
-    caveau = Sensor(constant.CAVEAU_GPIO, "caveau")
-    serre = Sensor(constant.SERRE_GPIO, "serre")
+    """
 
-    GPIO.setup(constant.BIRD_GPIO, GPIO.OUT)
-    GPIO.setup(constant.MOINE_GPIO, GPIO.OUT)
+    def __init__(self):
+        GPIO.setmode(GPIO.BCM)
+        GPIO.setup(constant.BIRD_GPIO, GPIO.OUT)
+        GPIO.setup(constant.MOINE_GPIO, GPIO.OUT)
 
+        self.sensors = {
+            'start': Sensor(constant.START_GPIO, "start"),
+            'atelier': Sensor(constant.ATELIER_GPIO, "atelier"),
+            'caveau': Sensor(constant.CAVEAU_GPIO, "caveau"),
+            'serre': Sensor(constant.SERRE_GPIO, "serre"),
+            'tonneau': Thermometer(name_get="temperature", difference=2),
+        }
+        self.sensors['tonneau'].start()
 
-def wait_start():
-    """Do nothing until the start button is pressed, then exit."""
-    while not start.read():
-        time.sleep(0.1)
-    start.activated = True
-    LOG.info("Start button pressed.\n")
-    subprocess.call(
-        ["curl", "-X", "GET", "{}start".format(constant.URL_DST)])
-    time.sleep(5)
-    subprocess.call(
-        ["curl", "-X", "GET", "{}machine".format(constant.URL_DST)])
+    def wait_start(self):
+        """Do nothing until the start button is pressed, then exit."""
+        while not self.sensors['start'].read():
+            time.sleep(0.1)
+            self.sensors['start'].activated = True
+            LOG.info("Start button pressed.\n")
+            subprocess.call(
+                ["curl", "-X", "GET", "{}start".format(constant.URL_DST)])
+            time.sleep(5)
+            subprocess.call(
+                ["curl", "-X", "GET", "{}machine".format(constant.URL_DST)])
 
-
-def main():
-    LOG.info("Start service.")
-    try:
-        LOG.debug("Initializing.")
-        init()
-        LOG.debug("Wait for game start.")
-        wait_start()
-        LOG.debug("Game started.")
-        while (True):
-            LOG.debug("Check atelier.")
-            atelier.check_run()
-            LOG.debug("Check caveau.")
-            caveau.check_run()
-            LOG.debug("Check serre.")
-            serre.check_run()
+    def run(self):
+        """Wait for events to send triggers."""
+        while not self.is_complete():
+            LOG.debug("Check atelier.\n")
+            self.sensors['atelier'].check_run()
+            LOG.debug("Check caveau.\n")
+            self.sensors['caveau'].check_run()
+            LOG.debug("Check serre.\n")
+            self.sensors['serre'].check_run()
             LOG.debug("Check temperature.")
-            if sensor_temperature.check_run():
+            if self.sensors['tonneau'].check_run():
                 tonneau_callback()
-    finally:
-        GPIO.cleanup()
-        LOG.info("Stop service.")
+            time.sleep(0.1)
+
+    def start(self):
+        """
+        Start a new game.
+
+        Wait for the start signal, then listen for sensor update to trigger
+        the associated action.
+
+        """
+        LOG.info("Start service.\n")
+
+        try:
+            LOG.debug("Wait for game start.\n")
+            self.wait_start()
+            LOG.debug("Game started.\n")
+            self.run()
+        finally:
+            GPIO.cleanup()
+            LOG.info("Stop service.")
+
+    def is_complete(self):
+        """
+        Check if the Game instance still has something to do before next game.
+
+        Return True if Game is complete. False otherwise.
+
+        """
+        return self.sensors['tonneau'].activated
 
 
 if __name__ == "__main__":
@@ -210,4 +233,4 @@ if __name__ == "__main__":
     STDOUT_HANDLER = logging.StreamHandler(sys.stdout)
     LOG.addHandler(STDOUT_HANDLER)
 
-    main()
+    Game().start()
