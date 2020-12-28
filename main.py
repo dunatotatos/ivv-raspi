@@ -233,4 +233,5 @@ if __name__ == "__main__":
     STDOUT_HANDLER = logging.StreamHandler(sys.stdout)
     LOG.addHandler(STDOUT_HANDLER)
 
-    Game().start()
+    while True:
+        Game().start()
