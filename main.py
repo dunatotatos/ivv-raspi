@@ -38,6 +38,7 @@ class Sensor:
         return bool(GPIO.input(self.pin)) ^ self.reverse
 
     def get_request(self):
+        """Send a signal to Houdini for this sensor."""
         LOG.debug("get request send:{}".format(self.name_get))
         subprocess.call([
             "curl", "-m", "1", "-X", "GET", "{}{}".format(
@@ -45,6 +46,13 @@ class Sensor:
         ])
 
     def check_run(self):
+        """
+        Cif the sensor is active, and send a request to Houdini.
+
+        This method combines self.read and self.get_request in a simple
+        one-shot method.
+
+        """
         if self.read() and game_state[self.name_get] == False:
             LOG.debug(game_state)
             game_state[self.name_get] = True
