@@ -6,7 +6,6 @@ import sys
 from w1thermsensor import W1ThermSensor
 from w1thermsensor.errors import ResetValueError
 
-import listener
 import constant
 
 LOG = logging.getLogger(__name__)
@@ -153,6 +152,7 @@ def tonneau_callback():
 def init():
     GPIO.setmode(GPIO.BCM)
 
+    global start
     global atelier
     global caveau
     global serre
@@ -160,6 +160,7 @@ def init():
     sensor_temperature = Thermometer(name_get="temperature", difference=2)
     sensor_temperature.start()
 
+    start = Sensor(constant.START_GPIO, "start")
     atelier = Sensor(constant.ATELIER_GPIO, "atelier")
     caveau = Sensor(constant.CAVEAU_GPIO, "caveau")
     serre = Sensor(constant.SERRE_GPIO, "serre")
@@ -169,13 +170,16 @@ def init():
 
 
 def wait_start():
-    if listener.server_program() == "start":
-        LOG.info("C'est parti !")
-        subprocess.call(
-            ["curl", "-X", "GET", "{}start".format(constant.URL_DST)])
-        time.sleep(5)
-        subprocess.call(
-            ["curl", "-X", "GET", "{}machine".format(constant.URL_DST)])
+    """Do nothing until the start button is pressed, then exit."""
+    while not start.read():
+        time.sleep(0.1)
+    start.activated = True
+    LOG.info("Start button pressed.\n")
+    subprocess.call(
+        ["curl", "-X", "GET", "{}start".format(constant.URL_DST)])
+    time.sleep(5)
+    subprocess.call(
+        ["curl", "-X", "GET", "{}machine".format(constant.URL_DST)])
 
 
 def main():
