@@ -58,6 +58,8 @@ class Sensor:
             LOG.debug("Activate %s sensor.\n", self.name_get)
             self.activated = True
             self.get_request()
+            return True
+        return False
 
 
 def check_run_temperature(sensor):
