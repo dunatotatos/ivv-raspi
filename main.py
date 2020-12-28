@@ -31,6 +31,7 @@ class Sensor:
         self.pin = pin
         self.name_get = name_get
         self.reverse = reverse
+        self.activated = False
         GPIO.setup(self.pin, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 
     def read(self):
@@ -53,9 +54,9 @@ class Sensor:
         one-shot method.
 
         """
-        if self.read() and game_state[self.name_get] == False:
+        if self.read() and not self.activated:
             LOG.debug("Activate %s sensor.\n", self.name_get)
-            game_state[self.name_get] = True
+            self.activated = True
             self.get_request()
 
 
@@ -117,13 +118,11 @@ def init():
     global atelier
     global caveau
     global serre
-    global game_state
     global sensor_temperature
     sensor_temperature = W1ThermSensor()
     global start_temperature
     start_temperature = sensor_temperature.get_temperature()
 
-    game_state = {"atelier": False, "caveau": False, "serre": False}
     atelier = Sensor(constant.ATELIER_GPIO, "atelier")
     caveau = Sensor(constant.CAVEAU_GPIO, "caveau")
     serre = Sensor(constant.SERRE_GPIO, "serre")
