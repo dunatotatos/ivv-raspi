@@ -62,8 +62,30 @@ class Sensor:
         return False
 
 
-def check_run_temperature(sensor):
-    def safe_get_temperature(sensor):
+class Thermometer(Sensor):
+    """
+    A sensor which reads a difference of temperature since its creation.
+
+    Due to the very specific usage in this room, this class includes the
+    activation of a relay.
+
+    int difference: minimum temperature difference needed to activate.
+
+    """
+
+    def __init__(self, *args, **kwargs):
+        self.difference = kwargs.pop('difference')
+        super(Thermometer, self).__init__(pin=0, *args, **kwargs)
+
+        # Automatically find where the thermometer is connected.
+        self.sensor = W1ThermSensor()
+        self.start_temperature = 0  # To set with self.start
+
+    def start(self):
+        """Set starting temperature."""
+        self.start_temperature = self.safe_get_temperature()
+
+    def safe_get_temperature(self):
         """
         Try hard to return the reading of the temp sensor.
 
@@ -85,33 +107,47 @@ def check_run_temperature(sensor):
         nb_exceptions = 0
         while True:
             try:
-                current_temperature = sensor.get_temperature()
+                current_temperature = self.sensor.get_temperature()
             except ResetValueError:
                 nb_exceptions += 1
                 LOG.warning(
                     "Temperature sensor sent reset value %s times. Ignoring.",
                     nb_exceptions)
                 if nb_exceptions >= 10:
-                    LOG.error("Maximum number of hardware failures reached. Stopping...")
+                    LOG.error("%s %s",
+                              "Maximum number of hardware failures reached. ",
+                              "Stopping...")
                     raise
             else:
+                LOG.debug("Current temperature: %s.\n",
+                          str(current_temperature))
                 return current_temperature
-            time.sleep(0.1)
+            time.sleep(0.01)
 
-    current_temperature = safe_get_temperature(sensor)
-    LOG.debug("Current temperature: %s.", str(current_temperature))
+    def read(self):
+        """
+        Check if the temperature raised wince starting of the game.
 
-    if current_temperature > (start_temperature + 2):
-        GPIO.output(constant.MOINE_GPIO, True)
-        subprocess.call([
-            "curl", "-m", "1", "-X", "GET",
-            "{}temperature".format(constant.URL_DST)
-        ])
-        time.sleep(61)
-        GPIO.output(constant.BIRD_GPIO, True)
-        time.sleep(50)
-        while True:
-            GPIO.output(constant.BIRD_GPIO, False)
+        Return the result as boolean
+
+        """
+        floor_temperature = self.start_temperature + self.difference
+        return self.safe_get_temperature() > floor_temperature
+
+
+def tonneau_callback():
+    """
+    Scenario to trigger when temperature is raised.
+
+    Turns on the moine, wait for the end of the soundtrack,
+    then trigger the bird flight.
+
+    """
+    GPIO.output(constant.MOINE_GPIO, True)
+    time.sleep(61)
+    GPIO.output(constant.BIRD_GPIO, True)
+    time.sleep(50)
+    GPIO.output(constant.BIRD_GPIO, False)
 
 
 def init():
@@ -121,9 +157,8 @@ def init():
     global caveau
     global serre
     global sensor_temperature
-    sensor_temperature = W1ThermSensor()
-    global start_temperature
-    start_temperature = sensor_temperature.get_temperature()
+    sensor_temperature = Thermometer(name_get="temperature", difference=2)
+    sensor_temperature.start()
 
     atelier = Sensor(constant.ATELIER_GPIO, "atelier")
     caveau = Sensor(constant.CAVEAU_GPIO, "caveau")
@@ -159,7 +194,8 @@ def main():
             LOG.debug("Check serre.")
             serre.check_run()
             LOG.debug("Check temperature.")
-            check_run_temperature(sensor_temperature)
+            if sensor_temperature.check_run():
+                tonneau_callback()
     finally:
         GPIO.cleanup()
         LOG.info("Stop service.")
