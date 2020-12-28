@@ -2,6 +2,7 @@ import RPi.GPIO as GPIO
 import subprocess
 import time
 import logging
+import sys
 from w1thermsensor import W1ThermSensor
 from w1thermsensor.errors import ResetValueError
 
@@ -140,4 +141,8 @@ def main():
 
 
 if __name__ == "__main__":
+    LOG.setLevel(logging.INFO)
+    STDOUT_HANDLER = logging.StreamHandler(sys.stdout)
+    LOG.addHandler(STDOUT_HANDLER)
+
     main()
