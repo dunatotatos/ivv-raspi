@@ -74,16 +74,16 @@ def check_run_temperature(sensor):
     LOG.debug("Current temperature: %s.", str(current_temperature))
 
     if current_temperature > (start_temperature + 2):
-        GPIO.output(moine, True)
+        GPIO.output(constant.MOINE_GPIO, True)
         subprocess.call([
             "curl", "-m", "1", "-X", "GET",
             "{}temperature".format(constant.URL_DST)
         ])
         time.sleep(61)
-        GPIO.output(bird, True)
+        GPIO.output(constant.BIRD_GPIO, True)
         time.sleep(50)
         while True:
-            GPIO.output(bird, False)
+            GPIO.output(constant.BIRD_GPIO, False)
 
 
 def init():
@@ -99,16 +99,12 @@ def init():
     start_temperature = sensor_temperature.get_temperature()
 
     game_state = {"atelier": False, "caveau": False, "serre": False}
-    atelier = Sensor(11, "atelier")
-    caveau = Sensor(5, "caveau")
-    serre = Sensor(9, "serre")
+    atelier = Sensor(constant.ATELIER_GPIO, "atelier")
+    caveau = Sensor(constant.CAVEAU_GPIO, "caveau")
+    serre = Sensor(constant.SERRE_GPIO, "serre")
 
-    global bird
-    bird = 21
-    global moine
-    moine = 20
-    GPIO.setup(bird, GPIO.OUT)
-    GPIO.setup(moine, GPIO.OUT)
+    GPIO.setup(constant.BIRD_GPIO, GPIO.OUT)
+    GPIO.setup(constant.MOINE_GPIO, GPIO.OUT)
 
 
 def wait_start():
