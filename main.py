@@ -177,13 +177,13 @@ class Game:
         """Do nothing until the start button is pressed, then exit."""
         while not self.sensors['start'].read():
             time.sleep(0.1)
-            self.sensors['start'].activated = True
-            LOG.info("Start button pressed.\n")
-            subprocess.call(
-                ["curl", "-X", "GET", "{}start".format(constant.URL_DST)])
-            time.sleep(5)
-            subprocess.call(
-                ["curl", "-X", "GET", "{}machine".format(constant.URL_DST)])
+        self.sensors['start'].activated = True
+        LOG.info("Start button pressed.\n")
+        subprocess.call(
+            ["curl", "-X", "GET", "{}start".format(constant.URL_DST)])
+        time.sleep(5)
+        subprocess.call(
+            ["curl", "-X", "GET", "{}machine".format(constant.URL_DST)])
 
     def run(self):
         """Wait for events to send triggers."""
