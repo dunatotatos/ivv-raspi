@@ -192,10 +192,10 @@ class Game:
         while not self.is_complete():
             LOG.debug("Check atelier.\n")
             self.sensors['atelier'].check_run()
-            LOG.debug("Check caveau.\n")
-            self.sensors['caveau'].check_run()
             LOG.debug("Check serre.\n")
             self.sensors['serre'].check_run()
+            LOG.debug("Check caveau.\n")
+            self.sensors['caveau'].check_run()
             LOG.debug("Check temperature.")
             if self.sensors['tonneau'].check_run():
                 tonneau_callback()
