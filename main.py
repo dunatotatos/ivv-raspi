@@ -163,6 +163,8 @@ class Game:
         GPIO.setmode(GPIO.BCM)
         GPIO.setup(constant.BIRD_GPIO, GPIO.OUT)
         GPIO.setup(constant.MOINE_GPIO, GPIO.OUT)
+        GPIO.output(constant.BIRD_GPIO, True)
+        # Leave MOINE On, until next game (start button pressed).
 
         self.sensors = {
             'start': Sensor(constant.START_GPIO, "start"),
@@ -213,6 +215,7 @@ class Game:
             LOG.debug("Wait for game start.\n")
             self.wait_start()
             LOG.debug("Game started.\n")
+            GPIO.output(constant.MOINE_GPIO, True)
             self.run()
         finally:
             GPIO.cleanup()
