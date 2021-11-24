@@ -5,6 +5,8 @@ import logging
 import sys
 from w1thermsensor import W1ThermSensor
 from w1thermsensor.errors import ResetValueError
+from threading import Thread
+from http.server import BaseHTTPRequestHandler, HTTPServer
 
 import constant
 
@@ -149,6 +151,31 @@ def tonneau_callback():
     GPIO.output(constant.BIRD_GPIO, False)
 
 
+class RequestHandler(BaseHTTPRequestHandler):
+    """Provide method to answer a HTTP requests."""
+
+    def do_HEAD(self):
+        """Send headers."""
+        self.send_response(200)
+        self.send_header('Content-type', 'text/html')
+        self.end_headers()
+
+    def do_GET(self):
+        """Answer a GET request."""
+        html = """OK"""
+        self.do_HEAD()
+        self.wfile.write(html.encode("UTF-8"))
+
+
+class HTTPStatusServer:
+    """Open and close an HTTP server."""
+
+    def __init__(self):
+        self._server = HTTPServer(
+            (constant.IP_RASPI, constant.PORT_RASPI), RequestHandler)
+        self._server.serve_forever()
+
+
 class Game:
     """
     One game instance.
@@ -236,5 +263,6 @@ if __name__ == "__main__":
     STDOUT_HANDLER = logging.StreamHandler(sys.stdout)
     LOG.addHandler(STDOUT_HANDLER)
 
+    Thread(target=HTTPStatusServer).start()
     while True:
         Game().start()
